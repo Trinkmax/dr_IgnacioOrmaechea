@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail, Sparkles, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
-import { Monogram } from "@/components/shell/nav";
+import { BrandLogo, Monogram } from "@/components/shell/nav";
 import { getSupabase } from "@/lib/supabase/client";
 import { callTeam } from "@/lib/queries/session";
 import { errorMessage } from "@/lib/utils";
@@ -67,18 +67,8 @@ export function LoginView() {
           style={{ background: "radial-gradient(circle at 30% 30%, #d9b8a4, transparent 62%)" }}
           aria-hidden
         />
-        <svg className="pointer-events-none absolute -bottom-24 -left-24 size-[520px] text-[#d9b8a4] opacity-[0.09]" viewBox="0 0 400 400" fill="none" aria-hidden>
-          {[60, 100, 140, 180].map((r) => (
-            <circle key={r} cx="200" cy="200" r={r} stroke="currentColor" strokeWidth="1" />
-          ))}
-        </svg>
-        <div className="relative flex items-center gap-3">
-          <Monogram light className="size-12 text-[21px]" />
-          <div>
-            <p className="font-display text-xl leading-tight text-white">Dr. Ignacio Ormaechea</p>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-[#a8988a]">Cirugía Plástica</p>
-          </div>
-        </div>
+        <BrandLogo className="pointer-events-none absolute -bottom-40 -right-40 size-[560px] text-[#d9b8a4] opacity-[0.07]" />
+        <BrandLogo className="relative size-[200px] text-[#efe6dd] xl:size-[232px]" />
         <div className="relative max-w-lg">
           <h1 className="font-display text-[64px] leading-[0.98] tracking-[-0.02em] text-white">
             Tu consultorio, <span className="italic text-[#e6c9b6]">en orden.</span>

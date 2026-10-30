@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Consultorio · Dr. Ignacio Ormaechea",
+    name: "Consultorio · Dr. José I. Ormaechea",
     short_name: "Ormaechea",
     description: "Agenda, pacientes, cobros, gastos y costos del consultorio.",
     start_url: "/",
@@ -11,8 +11,9 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#f6f3ee",
     lang: "es-AR",
     icons: [
-      { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
-      { src: "/apple-icon", sizes: "180x180", type: "image/png" },
+      { src: "/brand/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/brand/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/brand/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Drawer } from "vaul";
@@ -13,19 +13,40 @@ import { useRole, useSignOut } from "@/lib/queries/session";
 import { useSettings } from "@/lib/queries/catalog";
 import { cn } from "@/lib/utils";
 
+/** El logo se usa como máscara: toma el color del texto (currentColor) sobre cualquier fondo. */
+function logoMask(src: string): CSSProperties {
+  return {
+    WebkitMaskImage: `url(${src})`,
+    maskImage: `url(${src})`,
+    WebkitMaskSize: "contain",
+    maskSize: "contain",
+    WebkitMaskRepeat: "no-repeat",
+    maskRepeat: "no-repeat",
+    WebkitMaskPosition: "center",
+    maskPosition: "center",
+    backgroundColor: "currentColor",
+  };
+}
+
+/** Monograma "OJ" del logo dentro de un círculo. */
 export function Monogram({ className, light }: { className?: string; light?: boolean }) {
   return (
     <span
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-full font-display leading-none",
+        "flex shrink-0 items-center justify-center rounded-full",
         light ? "bg-[#f4eae3] text-[#26201c]" : "bg-brand text-[#f4eae3]",
         className,
       )}
       aria-hidden
     >
-      <span className="translate-y-[1px] tracking-[-0.04em]">IO</span>
+      <span className="block size-[76%]" style={logoMask("/brand/logo-mark.png")} />
     </span>
   );
+}
+
+/** Logo completo (monograma, arco y nombre en círculo). */
+export function BrandLogo({ className }: { className?: string }) {
+  return <span role="img" aria-label="Dr. José I. Ormaechea" className={cn("block", className)} style={logoMask("/brand/logo-full.png")} />;
 }
 
 function useQuickActions() {
