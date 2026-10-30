@@ -273,7 +273,7 @@ export function PageHeader({
   return (
     <header className={cn("flex flex-wrap items-end justify-between gap-x-4 gap-y-3", className)}>
       <div className="min-w-0">
-        <h1 className="font-display text-[34px] leading-[1.05] tracking-[-0.01em] text-ink md:text-[40px]">{title}</h1>
+        <h1 className="font-display text-[26px] leading-tight tracking-[-0.03em] text-ink md:text-[30px]">{title}</h1>
         {subtitle ? <p className="mt-1.5 text-sm text-muted">{subtitle}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
@@ -304,12 +304,12 @@ export function Kpi({
     accent: "bg-accent-soft text-accent-ink",
   }[tone];
   return (
-    <Card className={cn("flex min-w-0 flex-col gap-3 p-4 md:p-5", className)}>
+    <Card className={cn("@container flex min-w-0 flex-col gap-3 p-4 md:p-5", className)}>
       <div className="flex items-center justify-between gap-2">
         <span className="truncate text-[13px] font-medium text-muted">{label}</span>
         {icon ? <span className={cn("flex size-8 shrink-0 items-center justify-center rounded-xl [&_svg]:size-4", iconTone)}>{icon}</span> : null}
       </div>
-      <div className="truncate font-display text-[26px] leading-none tracking-[-0.01em] tabular-nums text-ink sm:text-[28px] md:text-[32px]">{value}</div>
+      <div className="truncate font-display text-[length:clamp(1.125rem,11.5cqi,1.875rem)] leading-none tracking-[-0.035em] tabular-nums text-ink">{value}</div>
       {hint ? <div className="line-clamp-2 text-xs leading-snug text-muted">{hint}</div> : null}
     </Card>
   );

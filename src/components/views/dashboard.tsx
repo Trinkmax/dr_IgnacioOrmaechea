@@ -149,7 +149,7 @@ export function DashboardView() {
       <PageHeader
         title={
           <>
-            {greeting(now)}, <span className="italic">{firstName(member?.full_name) || "Doctor"}</span>
+            {greeting(now)}, <span className="text-accent">{firstName(member?.full_name) || "Doctor"}</span>
           </>
         }
         subtitle={
@@ -468,7 +468,7 @@ function SurgeryRow({ appt, now, onClick }: { appt: CalendarAppointment; now: Da
     <button type="button" onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface p-3 text-left transition-colors hover:bg-subtle">
       <div className="w-12 shrink-0 rounded-xl bg-subtle py-1.5 text-center">
         <p className="text-[10px] font-semibold uppercase text-muted">{fmt(appt.starts_at, "EEE")}</p>
-        <p className="font-display text-xl leading-none text-ink">{fmt(appt.starts_at, "d")}</p>
+        <p className="font-display text-lg leading-none text-ink">{fmt(appt.starts_at, "d")}</p>
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-ink">{appt.patient?.full_name}</p>

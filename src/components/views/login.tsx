@@ -70,8 +70,8 @@ export function LoginView() {
         <BrandLogo className="pointer-events-none absolute -bottom-40 -right-40 size-[560px] text-[#d9b8a4] opacity-[0.07]" />
         <BrandLogo className="relative size-[200px] text-[#efe6dd] xl:size-[232px]" />
         <div className="relative max-w-lg">
-          <h1 className="font-display text-[64px] leading-[0.98] tracking-[-0.02em] text-white">
-            Tu consultorio, <span className="italic text-[#e6c9b6]">en orden.</span>
+          <h1 className="font-display text-[50px] leading-[1.04] tracking-[-0.04em] text-white">
+            Tu consultorio, <span className="text-[#e6c9b6]">en orden.</span>
           </h1>
           <p className="mt-6 max-w-md text-[15px] leading-relaxed text-[#b9ab9e]">
             Agenda, pacientes, cobros, proveedores y la rentabilidad real de cada tratamiento. Todo en un mismo lugar, en la compu o en el celular.
@@ -92,7 +92,7 @@ export function LoginView() {
           <div className="mb-10 flex items-center gap-3 lg:hidden">
             <Monogram className="size-11 text-[19px]" />
             <div>
-              <p className="font-display text-xl leading-tight text-ink">Dr. Ignacio Ormaechea</p>
+              <p className="font-display text-[13px] uppercase leading-[1.3] tracking-[0.1em] text-ink">Dr. Ignacio Ormaechea</p>
               <p className="text-[11px] uppercase tracking-[0.16em] text-muted">Cirugía Plástica</p>
             </div>
           </div>
@@ -108,7 +108,7 @@ export function LoginView() {
                   <Sparkles className="size-3.5" /> Primera vez
                 </div>
               ) : null}
-              <h2 className="font-display text-[40px] leading-[1.02] tracking-[-0.01em] text-ink">{isSetup ? "Configurá tu consultorio" : "Bienvenido"}</h2>
+              <h2 className="font-display text-[30px] leading-tight tracking-[-0.03em] text-ink">{isSetup ? "Configurá tu consultorio" : "Bienvenido"}</h2>
               <p className="mt-2 text-[15px] text-muted">
                 {isSetup ? "Creá la cuenta de administrador. Después vas a poder sumar a tu secretaria desde Ajustes." : "Ingresá con tu email y contraseña."}
               </p>

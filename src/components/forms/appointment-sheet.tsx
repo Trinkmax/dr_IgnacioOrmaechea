@@ -126,7 +126,7 @@ export function AppointmentSheet({ id }: { id: string }) {
         <div style={colorVars(appt.treatment?.color ?? "stone")} className="relative overflow-hidden rounded-2xl border border-[var(--tc-ring)] bg-[var(--tc-soft)] p-4">
           <div className="absolute inset-y-0 left-0 w-1 bg-[var(--tc)]" aria-hidden />
           <p className="text-[13px] font-medium text-[var(--tc-ink)]">{capitalize(fmt(appt.starts_at, "EEEE d 'de' MMMM"))}</p>
-          <p className="mt-1 font-display text-[34px] leading-none tracking-[-0.01em] text-ink tabular-nums">
+          <p className="mt-1 font-display text-[28px] leading-none tracking-[-0.03em] text-ink tabular-nums">
             {time(appt.starts_at)} <span className="text-[var(--tc-ink)]/60">–</span> {time(appt.ends_at)}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-1.5">

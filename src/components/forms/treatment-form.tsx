@@ -44,7 +44,7 @@ function TreatmentReadOnly({ treatment }: { treatment: TreatmentWithCosts }) {
       <SheetBody>
         <div style={colorVars(treatment.color)} className="rounded-2xl border border-[var(--tc-ring)] bg-[var(--tc-soft)] p-5">
           <p className="text-[13px] font-medium text-[var(--tc-ink)]">Precio de lista</p>
-          <p className="mt-1 font-display text-4xl text-ink">{money(treatment.price, treatment.currency)}</p>
+          <p className="mt-1 font-display text-3xl text-ink">{money(treatment.price, treatment.currency)}</p>
           <p className="mt-2 text-sm text-ink-2">Duración estimada: {durationLabel(treatment.duration_min)}</p>
         </div>
         {treatment.description ? <p className="mt-4 text-sm leading-relaxed text-ink-2">{treatment.description}</p> : null}
@@ -244,7 +244,7 @@ function TreatmentForm({ existing }: { existing: TreatmentWithCosts | null }) {
             <span className="text-[13px] text-white/60">Ganancia neta estimada</span>
             <span className={cn("rounded-full bg-white px-2 py-0.5 text-xs font-semibold", marginTone)}>{percent(breakdown.margin)} margen</span>
           </div>
-          <p className="mt-1 font-display text-[34px] leading-none tabular-nums">{money(breakdown.profitArs)}</p>
+          <p className="mt-1 font-display text-[28px] leading-none tracking-[-0.03em] tabular-nums">{money(breakdown.profitArs)}</p>
           <div className="mt-3 grid grid-cols-3 gap-2 text-xs text-white/70">
             <span>Costos: <b className="font-semibold text-white">{money(breakdown.directArs)}</b></span>
             <span>Fijos: <b className="font-semibold text-white">{money(breakdown.fixedArs)}</b></span>

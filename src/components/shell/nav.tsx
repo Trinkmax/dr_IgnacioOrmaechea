@@ -78,7 +78,7 @@ export function Sidebar({ onSearch }: { onSearch: () => void }) {
       <div className="flex items-center gap-3 px-4 pb-4 pt-5 lg:px-5">
         <Monogram light className="size-11 text-[19px]" />
         <div className="hidden min-w-0 lg:block">
-          <p className="truncate font-display text-[19px] leading-tight text-white">{settings?.clinic_name ?? "Dr. Ignacio Ormaechea"}</p>
+          <p className="line-clamp-2 font-display text-[12.5px] uppercase leading-[1.3] tracking-[0.1em] text-white">{settings?.clinic_name ?? "Dr. Ignacio Ormaechea"}</p>
           <p className="truncate text-[11px] uppercase tracking-[0.14em] text-[#a8988a]">{settings?.clinic_tagline ?? "Cirugía Plástica"}</p>
         </div>
       </div>
@@ -208,7 +208,7 @@ export function MobileTopBar({ onSearch }: { onSearch: () => void }) {
       <div className="flex h-14 items-center gap-3 px-4">
         <Monogram className="size-9 text-[15px]" />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-display text-[17px] leading-tight text-ink">{settings?.clinic_name ?? "Dr. Ignacio Ormaechea"}</p>
+          <p className="line-clamp-2 font-display text-[11.5px] uppercase leading-[1.25] tracking-[0.1em] text-ink">{settings?.clinic_name ?? "Dr. Ignacio Ormaechea"}</p>
           <p className="truncate text-[10px] uppercase tracking-[0.14em] text-muted">{settings?.clinic_tagline ?? "Cirugía Plástica"}</p>
         </div>
         <button type="button" onClick={onSearch} aria-label="Buscar" className="flex size-10 items-center justify-center rounded-full text-ink-2 transition-colors active:bg-sunken">

@@ -77,7 +77,7 @@ export function TimeGrid(props: Props) {
                 <span className={cn("text-[10px] font-semibold uppercase tracking-[0.12em]", today ? "text-accent-ink" : "text-muted")}>{fmt(d, "EEE")}</span>
                 <span
                   className={cn(
-                    "flex size-8 items-center justify-center rounded-full font-display text-[19px] leading-none",
+                    "flex size-8 items-center justify-center rounded-full font-display text-[15px] leading-none",
                     today ? "bg-brand text-white" : "text-ink",
                   )}
                 >

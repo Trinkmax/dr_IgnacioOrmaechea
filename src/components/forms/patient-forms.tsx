@@ -364,7 +364,7 @@ function AppointmentRow({ appt, onClick }: { appt: CalendarAppointment; onClick:
     <button type="button" onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-3.5 py-3 text-left transition-colors hover:bg-subtle">
       <div className="w-14 shrink-0 text-center">
         <p className="text-[11px] font-medium uppercase text-muted">{fmt(appt.starts_at, "MMM")}</p>
-        <p className="font-display text-2xl leading-none text-ink">{fmt(appt.starts_at, "d")}</p>
+        <p className="font-display text-xl leading-none text-ink">{fmt(appt.starts_at, "d")}</p>
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">

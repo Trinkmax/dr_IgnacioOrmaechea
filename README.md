@@ -51,6 +51,10 @@ Los permisos se aplican en la base de datos con RLS (no solo ocultando pantallas
 - **Calculadora**: costos directos + gastos fijos prorrateados por hora + impuestos ⇒ ganancia neta, margen, precio sugerido por margen objetivo y ranking de rentabilidad por hora.
 - **Tiempo real**: lo que carga la secretaria aparece solo en el teléfono del Dr.
 
+## Marca
+
+El logo está en `public/brand/`: `logo-mark.png` (monograma OJ) y `logo-full.png` (logo completo) se usan como máscara, así toman el color del contexto (crema sobre oscuro, espresso sobre claro). Los íconos de la app (`src/app/icon.png`, `src/app/apple-icon.png`, `public/brand/icon-*.png`) usan el monograma crema sobre espresso.
+
 ## Base de datos
 
 Migraciones en `supabase/migrations/` (ya aplicadas al proyecto `eppqkaadshtaratdcdix`). La Edge Function `supabase/functions/team` gestiona altas/bajas del equipo (crea usuarios confirmados, sin depender de emails).

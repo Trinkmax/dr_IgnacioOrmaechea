@@ -140,7 +140,7 @@ export function TreatmentsView() {
                         <span className="size-2.5 rounded-full bg-[var(--tc)]" />
                       </span>
                     </div>
-                    <p className="mt-4 font-display text-[30px] leading-none tracking-[-0.01em] tabular-nums text-ink">{money(t.price, t.currency)}</p>
+                    <p className="mt-4 font-display text-[24px] leading-none tracking-[-0.03em] tabular-nums text-ink">{money(t.price, t.currency)}</p>
                     {t.currency === "USD" ? <p className="mt-1 text-xs tabular-nums text-muted">≈ {money(priceArs)}</p> : <p className="mt-1 text-xs text-transparent">·</p>}
                     {isAdmin ? (
                       <div className="mt-4 border-t border-line pt-3">

@@ -147,7 +147,7 @@ function CenteredMessage({ icon, title, description, action }: { icon?: ReactNod
     <div className="flex min-h-dvh items-center justify-center px-6">
       <div className="max-w-sm text-center">
         <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-accent-soft text-accent-ink">{icon ?? <Monogram className="size-10 text-base" />}</div>
-        <h1 className="font-display text-3xl text-ink">{title}</h1>
+        <h1 className="font-display text-2xl text-ink">{title}</h1>
         <p className="mt-2 text-sm leading-relaxed text-muted">{description}</p>
         {action ? <div className="mt-6 flex justify-center">{action}</div> : null}
       </div>

@@ -257,7 +257,7 @@ function AccountSettings() {
         <div className="flex items-center gap-4">
           <Avatar name={me?.member?.full_name} size={56} />
           <div className="min-w-0">
-            <p className="truncate font-display text-2xl text-ink">{me?.member?.full_name}</p>
+            <p className="truncate font-display text-xl text-ink">{me?.member?.full_name}</p>
             <p className="truncate text-sm text-muted">{me?.email}</p>
           </div>
         </div>

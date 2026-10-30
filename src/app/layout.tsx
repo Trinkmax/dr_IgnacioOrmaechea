@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 
 const geist = Geist({
@@ -12,10 +12,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument",
-  weight: "400",
-  style: ["normal", "italic"],
+// Títulos y números: sans geométrica en línea con el texto circular del logo.
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin", "latin-ext"],
 });
 
@@ -40,7 +39,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es-AR" className={`${geist.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full`}>
+    <html lang="es-AR" className={`${geist.variable} ${geistMono.variable} ${montserrat.variable} h-full`}>
       <body className="min-h-full">{children}</body>
     </html>
   );

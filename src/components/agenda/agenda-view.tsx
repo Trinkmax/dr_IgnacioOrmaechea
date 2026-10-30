@@ -479,7 +479,7 @@ export function AgendaView() {
       {/* Barra de herramientas */}
       <div className="shrink-0 border-b border-line bg-canvas px-3 pb-2.5 pt-3 md:px-6 md:pb-4 md:pt-6">
         <div className="flex items-center gap-2">
-          <h1 className="min-w-0 flex-1 truncate font-display text-[26px] leading-none text-ink md:text-[34px]">
+          <h1 className="min-w-0 flex-1 truncate font-display text-[22px] leading-none tracking-[-0.03em] text-ink md:text-[26px]">
             {title}
             {isFetching ? <span className="ml-2 inline-block size-1.5 animate-pulse rounded-full bg-accent align-middle" aria-hidden /> : null}
           </h1>

@@ -267,12 +267,12 @@ function CalculatorInner({ treatments, settings }: { treatments: TreatmentWithCo
                     className="h-2 flex-1 cursor-pointer accent-[#26201c]"
                     aria-label="Margen objetivo"
                   />
-                  <span className="w-16 text-right font-display text-3xl tabular-nums text-ink">{targetMargin}%</span>
+                  <span className="w-16 text-right font-display text-2xl tabular-nums text-ink">{targetMargin}%</span>
                 </div>
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-subtle p-4">
                   <div>
                     <p className="text-xs text-muted">Precio sugerido</p>
-                    <p className="font-display text-3xl tabular-nums text-ink">{suggested ? money(suggested, currency) : "—"}</p>
+                    <p className="font-display text-2xl tabular-nums text-ink">{suggested ? money(suggested, currency) : "—"}</p>
                   </div>
                   <Segmented
                     size="sm"
@@ -299,7 +299,7 @@ function CalculatorInner({ treatments, settings }: { treatments: TreatmentWithCo
                   {percent(b.margin)} margen
                 </span>
               </div>
-              <p className={cn("mt-2 font-display text-[44px] leading-none tabular-nums", b.profitArs < 0 && "text-[#f3b2a9]")}>{money(b.profitArs)}</p>
+              <p className={cn("mt-2 font-display text-[36px] leading-none tracking-[-0.035em] tabular-nums", b.profitArs < 0 && "text-[#f3b2a9]")}>{money(b.profitArs)}</p>
               <p className="mt-1.5 text-sm tabular-nums text-white/60">
                 ≈ {money(b.profitArs / usdRate, "USD")} · {money(b.profitPerHour)} por hora
               </p>
