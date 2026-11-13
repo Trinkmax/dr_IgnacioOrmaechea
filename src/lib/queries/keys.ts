@@ -18,6 +18,9 @@ export const qk = {
   expensesRange: (from: string, to: string) => ["expenses", "range", from, to] as const,
   payables: ["expenses", "payables"] as const,
   supplierExpenses: (id: string) => ["expenses", "supplier", id] as const,
+  expense: (id: string) => ["expenses", "one", id] as const,
+  expensePayments: (id: string) => ["expenses", "payments", id] as const,
+  supplierPayments: (id: string) => ["expenses", "supplier-payments", id] as const,
   waitlist: ["waitlist"] as const,
   stats: (from: string) => ["stats", from] as const,
 };

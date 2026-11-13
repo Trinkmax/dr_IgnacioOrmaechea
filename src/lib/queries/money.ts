@@ -6,9 +6,13 @@ import { qk } from "@/lib/queries/keys";
 import type { TablesInsert, TablesUpdate } from "@/lib/database.types";
 import type {
   AppointmentBalance,
+  Currency,
+  ExpensePayment,
+  ExpensePaymentWithExpense,
   ExpenseWithRefs,
   Patient,
   Payment,
+  PaymentMethod,
   PaymentWithRefs,
   Treatment,
 } from "@/lib/types";
@@ -210,6 +214,108 @@ export function useDeleteExpense() {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await getSupabase().from("expenses").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidateExpenses(queryClient),
+  });
+}
+
+export function useExpense(id: string | null | undefined) {
+  return useQuery({
+    queryKey: qk.expense(id ?? "none"),
+    queryFn: async (): Promise<ExpenseWithRefs | null> => {
+      const { data, error } = await getSupabase().from("expenses").select(EXPENSE_SELECT).eq("id", id!).maybeSingle();
+      if (error) throw error;
+      return data as unknown as ExpenseWithRefs | null;
+    },
+    enabled: Boolean(id),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Pagos de egresos (totales o parciales). El saldo del egreso lo recalcula la base.
+// ---------------------------------------------------------------------------
+const EXPENSE_PAYMENT_SELECT = "*, expense:expenses!inner(id, description, currency, usd_rate, supplier_id)";
+
+export function useExpensePayments(expenseId: string | null | undefined) {
+  return useQuery({
+    queryKey: qk.expensePayments(expenseId ?? "none"),
+    queryFn: async () => {
+      const { data, error } = await getSupabase()
+        .from("expense_payments")
+        .select("*")
+        .eq("expense_id", expenseId!)
+        .order("paid_on", { ascending: false })
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as ExpensePayment[];
+    },
+    enabled: Boolean(expenseId),
+  });
+}
+
+export function useSupplierPayments(supplierId: string | null | undefined) {
+  return useQuery({
+    queryKey: qk.supplierPayments(supplierId ?? "none"),
+    queryFn: async () => {
+      const { data, error } = await getSupabase()
+        .from("expense_payments")
+        .select(EXPENSE_PAYMENT_SELECT)
+        .eq("expense.supplier_id", supplierId!)
+        .order("paid_on", { ascending: false })
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as ExpensePaymentWithExpense[];
+    },
+    enabled: Boolean(supplierId),
+  });
+}
+
+export function useAddExpensePayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (values: TablesInsert<"expense_payments">): Promise<ExpensePayment> => {
+      const { data, error } = await getSupabase().from("expense_payments").insert(values).select("*").single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => invalidateExpenses(queryClient),
+  });
+}
+
+/** Pago a cuenta de un proveedor: la base lo imputa a sus deudas, de la más vieja a la más nueva. */
+export function usePaySupplier() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      supplierId: string;
+      currency: Currency;
+      amount: number;
+      paidOn: string;
+      method: PaymentMethod;
+      notes?: string | null;
+    }): Promise<string[]> => {
+      const { data, error } = await getSupabase().rpc("pay_supplier", {
+        p_supplier_id: input.supplierId,
+        p_currency: input.currency,
+        p_amount: input.amount,
+        p_paid_on: input.paidOn,
+        p_method: input.method,
+        p_notes: input.notes ?? undefined,
+      });
+      if (error) throw error;
+      return data ?? [];
+    },
+    onSuccess: () => invalidateExpenses(queryClient),
+  });
+}
+
+export function useDeleteExpensePayments() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      if (!ids.length) return;
+      const { error } = await getSupabase().from("expense_payments").delete().in("id", ids);
       if (error) throw error;
     },
     onSuccess: () => invalidateExpenses(queryClient),

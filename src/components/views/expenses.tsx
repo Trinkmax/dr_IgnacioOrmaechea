@@ -48,7 +48,7 @@ function Expenses() {
       .map((r) => ({ template: r, expense: byRecurring.get(r.id) ?? null }));
     const paid = rows.filter((r) => r.expense?.paid_on).length;
     const totalArs = rows.reduce((t, r) => t + (r.expense ? (r.expense.amount_ars ?? 0) : toArs(r.template.amount, r.template.currency, usdRate)), 0);
-    const paidArs = rows.reduce((t, r) => t + (r.expense?.paid_on ? (r.expense.amount_ars ?? 0) : 0), 0);
+    const paidArs = rows.reduce((t, r) => t + (r.expense ? paidArsOf(r.expense) : 0), 0);
     return { rows, paid, totalArs, paidArs };
   }, [expenses, recurring, usdRate]);
 
@@ -56,7 +56,7 @@ function Expenses() {
 
   const totals = useMemo(() => {
     const registered = expenses.reduce((t, e) => t + (e.amount_ars ?? 0), 0);
-    const paid = expenses.filter((e) => e.paid_on).reduce((t, e) => t + (e.amount_ars ?? 0), 0);
+    const paid = expenses.reduce((t, e) => t + paidArsOf(e), 0);
     const fixedMissing = fixed.rows.filter((r) => !r.expense).reduce((t, r) => t + toArs(r.template.amount, r.template.currency, usdRate), 0);
     const byCategory = new Map<string, number>();
     for (const e of expenses) byCategory.set(e.category, (byCategory.get(e.category) ?? 0) + (e.amount_ars ?? 0));
@@ -261,8 +261,14 @@ function Expenses() {
   );
 }
 
+/** Lo ya pagado de un egreso, en pesos (incluye pagos parciales). */
+function paidArsOf(e: ExpenseWithRefs) {
+  return (e.amount_ars ?? 0) - (e.balance_ars ?? (e.paid_on ? 0 : (e.amount_ars ?? 0)));
+}
+
 function ExpenseRow({ expense: e, today, onClick }: { expense: ExpenseWithRefs; today: string; onClick: () => void }) {
   const overdue = !e.paid_on && e.due_on < today;
+  const partial = !e.paid_on && (e.paid_amount ?? 0) > 0;
   return (
     <li>
       <button type="button" onClick={onClick} className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-subtle md:px-5">
@@ -275,7 +281,13 @@ function ExpenseRow({ expense: e, today, onClick }: { expense: ExpenseWithRefs; 
         </div>
         <div className="flex flex-col items-end gap-1">
           <span className="text-sm font-semibold tabular-nums text-ink">{money(e.amount, e.currency)}</span>
-          {e.paid_on ? <Badge tone="success" className="h-5 px-2 text-[10px]">Pagado</Badge> : <Badge tone={overdue ? "danger" : "warning"} className="h-5 px-2 text-[10px]">{overdue ? "Vencido" : "Pendiente"}</Badge>}
+          {e.paid_on ? (
+            <Badge tone="success" className="h-5 px-2 text-[10px]">Pagado</Badge>
+          ) : partial ? (
+            <Badge tone={overdue ? "danger" : "info"} className="h-5 px-2 text-[10px]">Saldo {money(e.balance ?? e.amount, e.currency)}</Badge>
+          ) : (
+            <Badge tone={overdue ? "danger" : "warning"} className="h-5 px-2 text-[10px]">{overdue ? "Vencido" : "Pendiente"}</Badge>
+          )}
         </div>
       </button>
     </li>

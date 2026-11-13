@@ -3,22 +3,19 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Field, Input, MoneyInput, Select, Textarea } from "@/components/ui/field";
 import { Segmented, Switch } from "@/components/ui/misc";
 import { SheetBody, SheetFooter, SheetHeader } from "@/components/ui/sheet";
 import { useConfirm } from "@/components/ui/confirm";
 import { useDismiss, type ExpenseDefaults } from "@/components/shell/overlay-store";
+import { ExpensePaymentsPanel, MethodPicker } from "@/components/forms/expense-payment-forms";
 import { useDeleteRecurring, useRecurringExpenses, useSaveRecurring, useSettings, useSuppliers } from "@/lib/queries/catalog";
-import { useDeleteExpense, useSaveExpense } from "@/lib/queries/money";
-import { getSupabase } from "@/lib/supabase/client";
+import { useDeleteExpense, useExpense, useSaveExpense } from "@/lib/queries/money";
 import { fmt, isoDate, money } from "@/lib/format";
-import { cn, errorMessage } from "@/lib/utils";
+import { errorMessage } from "@/lib/utils";
 import {
   EXPENSE_CATEGORIES,
-  METHOD_META,
-  METHOD_ORDER,
   type Currency,
   type Expense,
   type ExpenseKind,
@@ -30,15 +27,7 @@ import {
 // Egreso (gasto variable, fijo del mes o factura de proveedor)
 // ---------------------------------------------------------------------------
 export function ExpenseFormSheet({ expenseId, defaults }: { expenseId?: string; defaults?: ExpenseDefaults }) {
-  const { data: existing, isLoading } = useQuery({
-    queryKey: ["expenses", "one", expenseId ?? "none"],
-    queryFn: async (): Promise<Expense | null> => {
-      const { data, error } = await getSupabase().from("expenses").select("*").eq("id", expenseId!).maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-    enabled: Boolean(expenseId),
-  });
+  const { data: existing, isLoading } = useExpense(expenseId);
   const { data: settings, isLoading: loadingSettings } = useSettings();
   if ((expenseId && isLoading) || loadingSettings) {
     return (
@@ -93,6 +82,9 @@ function ExpenseForm({ existing, defaults, usdRate: currentRate }: { existing: E
     setError(null);
     if (!description.trim()) return setError("Escribí una descripción.");
     if (!amount || amount <= 0) return setError("Ingresá el monto.");
+    if (existing && Math.round(amount * 100) < Math.round((existing.paid_amount ?? 0) * 100)) {
+      return setError(`El monto no puede ser menor a lo ya pagado (${money(existing.paid_amount, existing.currency, { decimals: true })}). Eliminá algún pago primero.`);
+    }
     try {
       await save.mutateAsync({
         id: existing?.id,
@@ -106,8 +98,9 @@ function ExpenseForm({ existing, defaults, usdRate: currentRate }: { existing: E
           currency,
           usd_rate: usdRate && usdRate > 0 ? usdRate : currentRate,
           due_on: dueOn,
-          paid_on: paid ? paidOn : null,
-          method: paid ? method : null,
+          // En un gasto existente los pagos se manejan desde su historial (pagos parciales);
+          // al crear uno nuevo "ya pagado", la base registra solo el pago por el total.
+          ...(existing ? {} : { paid_on: paid ? paidOn : null, method: paid ? method : null }),
           notes: notes.trim() || null,
         },
       });
@@ -191,41 +184,31 @@ function ExpenseForm({ existing, defaults, usdRate: currentRate }: { existing: E
           </div>
         ) : null}
 
-        <Field label={paid ? "Fecha del gasto" : "Vencimiento"}>
+        <Field label={(existing ? Boolean(existing.paid_on) : paid) ? "Fecha del gasto" : "Vencimiento"}>
           <Input type="date" value={dueOn} onChange={(e) => setDueOn(e.target.value)} />
         </Field>
 
-        <div className="rounded-2xl border border-line bg-subtle p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium text-ink">{paid ? "Ya está pagado" : "Pendiente de pago"}</p>
-              <p className="text-xs text-muted">{paid ? "Se descuenta de la caja" : "Queda en cuentas por pagar"}</p>
-            </div>
-            <Switch checked={paid} onChange={setPaid} label="Pagado" />
-          </div>
-          {paid ? (
-            <div className="mt-4 space-y-4">
-              <Field label="Fecha de pago">
-                <Input type="date" value={paidOn} onChange={(e) => setPaidOn(e.target.value)} />
-              </Field>
-              <div className="grid grid-cols-3 gap-1.5">
-                {METHOD_ORDER.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setMethod(m)}
-                    className={cn(
-                      "h-9 rounded-xl border text-xs font-medium transition-colors",
-                      method === m ? "border-brand bg-brand text-white" : "border-line bg-surface text-ink-2 hover:border-line-strong",
-                    )}
-                  >
-                    {METHOD_META[m].label}
-                  </button>
-                ))}
+        {existing ? (
+          <ExpensePaymentsPanel expense={existing} />
+        ) : (
+          <div className="rounded-2xl border border-line bg-subtle p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-ink">{paid ? "Ya está pagado" : "Pendiente de pago"}</p>
+                <p className="text-xs text-muted">{paid ? "Se descuenta de la caja" : "Queda en cuentas por pagar · después podés ir pagándolo en partes"}</p>
               </div>
+              <Switch checked={paid} onChange={setPaid} label="Pagado" />
             </div>
-          ) : null}
-        </div>
+            {paid ? (
+              <div className="mt-4 space-y-4">
+                <Field label="Fecha de pago">
+                  <Input type="date" value={paidOn} onChange={(e) => setPaidOn(e.target.value)} />
+                </Field>
+                <MethodPicker value={method} onChange={setMethod} />
+              </div>
+            ) : null}
+          </div>
+        )}
 
         <Field label="Notas">
           <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Nº de factura, detalle…" />

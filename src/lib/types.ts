@@ -17,6 +17,7 @@ export type Patient = Tables<"patients">;
 export type Appointment = Tables<"appointments">;
 export type Payment = Tables<"payments">;
 export type Expense = Tables<"expenses">;
+export type ExpensePayment = Tables<"expense_payments">;
 export type RecurringExpense = Tables<"recurring_expenses">;
 export type Supplier = Tables<"suppliers">;
 export type WaitlistItem = Tables<"waitlist">;
@@ -38,6 +39,11 @@ export type PaymentWithRefs = Payment & {
 
 export type ExpenseWithRefs = Expense & {
   supplier: Pick<Supplier, "id" | "name"> | null;
+};
+
+/** Pago (total o parcial) de un egreso, con el egreso al que se imputó. */
+export type ExpensePaymentWithExpense = ExpensePayment & {
+  expense: Pick<Expense, "id" | "description" | "currency" | "usd_rate" | "supplier_id">;
 };
 
 export type WaitlistWithRefs = WaitlistItem & {

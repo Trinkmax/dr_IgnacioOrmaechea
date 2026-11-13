@@ -32,6 +32,8 @@ export type OverlaySpec =
   | { type: "patient-form"; patientId?: string; initialName?: string; onSaved?: (patient: Patient) => void }
   | { type: "payment-form"; paymentId?: string; patientId?: string; appointmentId?: string }
   | { type: "expense-form"; expenseId?: string; defaults?: ExpenseDefaults }
+  | { type: "expense-payment"; expenseId: string }
+  | { type: "supplier-payment"; supplierId: string }
   | { type: "recurring-form"; recurringId?: string }
   | { type: "supplier"; id: string }
   | { type: "supplier-form"; supplierId?: string }

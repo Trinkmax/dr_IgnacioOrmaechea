@@ -78,6 +78,47 @@ export type Database = {
           },
         ]
       }
+      expense_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          expense_id: string
+          id: string
+          method: Database["public"]["Enums"]["payment_method"]
+          notes: string | null
+          paid_on: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          expense_id: string
+          id?: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          notes?: string | null
+          paid_on?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          expense_id?: string
+          id?: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          notes?: string | null
+          paid_on?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_payments_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "expenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -85,6 +126,8 @@ export type Database = {
           amount_usd: number | null
           appointment_id: string | null
           auto_generated: boolean
+          balance: number | null
+          balance_ars: number | null
           category: string
           created_at: string
           created_by: string | null
@@ -95,6 +138,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["expense_kind"]
           method: Database["public"]["Enums"]["payment_method"] | null
           notes: string | null
+          paid_amount: number
           paid_on: string | null
           recurring_id: string | null
           supplier_id: string | null
@@ -106,6 +150,8 @@ export type Database = {
           amount_usd?: number | null
           appointment_id?: string | null
           auto_generated?: boolean
+          balance?: number | null
+          balance_ars?: number | null
           category?: string
           created_at?: string
           created_by?: string | null
@@ -116,6 +162,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["expense_kind"]
           method?: Database["public"]["Enums"]["payment_method"] | null
           notes?: string | null
+          paid_amount?: number
           paid_on?: string | null
           recurring_id?: string | null
           supplier_id?: string | null
@@ -127,6 +174,8 @@ export type Database = {
           amount_usd?: number | null
           appointment_id?: string | null
           auto_generated?: boolean
+          balance?: number | null
+          balance_ars?: number | null
           category?: string
           created_at?: string
           created_by?: string | null
@@ -137,6 +186,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["expense_kind"]
           method?: Database["public"]["Enums"]["payment_method"] | null
           notes?: string | null
+          paid_amount?: number
           paid_on?: string | null
           recurring_id?: string | null
           supplier_id?: string | null
@@ -614,7 +664,17 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      pay_supplier: {
+        Args: {
+          p_amount: number
+          p_currency: Database["public"]["Enums"]["currency_code"]
+          p_method?: Database["public"]["Enums"]["payment_method"]
+          p_notes?: string
+          p_paid_on?: string
+          p_supplier_id: string
+        }
+        Returns: string[]
+      }
     }
     Enums: {
       app_role: "admin" | "asistente"

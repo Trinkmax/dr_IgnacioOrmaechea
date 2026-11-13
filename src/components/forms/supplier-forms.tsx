@@ -5,15 +5,16 @@ import { Check, Mail, MessageCircle, Pencil, Phone, Plus, Trash2 } from "lucide-
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
-import { Badge, Switch } from "@/components/ui/misc";
+import { Badge, Progress, Switch } from "@/components/ui/misc";
 import { SheetBody, SheetFooter, SheetHeader, SheetSection } from "@/components/ui/sheet";
 import { useConfirm } from "@/components/ui/confirm";
 import { useDismiss, useOverlay } from "@/components/shell/overlay-store";
 import { useDeleteSupplier, useSaveSupplier, useSuppliers } from "@/lib/queries/catalog";
-import { useSupplierExpenses, useUpdateExpense } from "@/lib/queries/money";
+import { useSupplierExpenses, useSupplierPayments } from "@/lib/queries/money";
+import { expenseBalance } from "@/components/forms/expense-payment-forms";
 import { capitalize, fmt, isoDate, money } from "@/lib/format";
 import { cn, errorMessage, telLink, whatsappLink } from "@/lib/utils";
-import { SUPPLIER_CATEGORIES, type ExpenseWithRefs, type Supplier } from "@/lib/types";
+import { METHOD_META, SUPPLIER_CATEGORIES, type Supplier } from "@/lib/types";
 
 export function SupplierFormSheet({ supplierId }: { supplierId?: string }) {
   const { data: suppliers = [], isLoading } = useSuppliers();
@@ -133,23 +134,23 @@ export function SupplierSheet({ id }: { id: string }) {
   const { data: suppliers = [], isLoading } = useSuppliers();
   const supplier = suppliers.find((s) => s.id === id) ?? null;
   const { data: expenses = [] } = useSupplierExpenses(id);
+  const { data: payments = [] } = useSupplierPayments(id);
   const { push } = useOverlay();
   const dismiss = useDismiss();
   const confirm = useConfirm();
   const remove = useDeleteSupplier();
-  const updateExpense = useUpdateExpense();
 
-  const { pending, paid, pendingArs, paidYearArs } = useMemo(() => {
-    const pending = expenses.filter((e) => !e.paid_on).sort((a, b) => a.due_on.localeCompare(b.due_on));
-    const paid = expenses.filter((e) => e.paid_on);
-    const year = new Date().getFullYear();
+  const { pending, pendingArs, paidYearArs } = useMemo(() => {
+    const pending = expenses.filter((e) => expenseBalance(e) > 0).sort((a, b) => a.due_on.localeCompare(b.due_on));
+    const year = String(new Date().getFullYear());
     return {
       pending,
-      paid,
-      pendingArs: pending.reduce((t, e) => t + (e.amount_ars ?? 0), 0),
-      paidYearArs: paid.filter((e) => e.paid_on!.startsWith(String(year))).reduce((t, e) => t + (e.amount_ars ?? 0), 0),
+      pendingArs: pending.reduce((t, e) => t + (e.balance_ars ?? e.amount_ars ?? 0), 0),
+      paidYearArs: payments
+        .filter((p) => p.paid_on.startsWith(year))
+        .reduce((t, p) => t + (p.expense.currency === "USD" ? p.amount * p.expense.usd_rate : p.amount), 0),
     };
-  }, [expenses]);
+  }, [expenses, payments]);
 
   if (!supplier) {
     return (
@@ -159,17 +160,6 @@ export function SupplierSheet({ id }: { id: string }) {
       </>
     );
   }
-
-  const markPaid = async (expense: ExpenseWithRefs) => {
-    try {
-      await updateExpense.mutateAsync({ id: expense.id, patch: { paid_on: isoDate(new Date()), method: "transferencia" } });
-      toast.success(`Pagado · ${money(expense.amount, expense.currency)}`, {
-        action: { label: "Deshacer", onClick: () => updateExpense.mutate({ id: expense.id, patch: { paid_on: null, method: null } }) },
-      });
-    } catch (e) {
-      toast.error(errorMessage(e));
-    }
-  };
 
   const onDelete = async () => {
     const ok = await confirm({
@@ -243,35 +233,47 @@ export function SupplierSheet({ id }: { id: string }) {
             <p className="rounded-2xl border border-dashed border-line px-4 py-4 text-center text-[13px] text-muted">Nada pendiente con este proveedor ✓</p>
           ) : (
             <div className="divide-y divide-line/70 overflow-hidden rounded-2xl border border-line">
-              {pending.map((e) => (
-                <div key={e.id} className="flex items-center gap-3 bg-surface px-3.5 py-3">
-                  <button type="button" onClick={() => push({ type: "expense-form", expenseId: e.id })} className="min-w-0 flex-1 text-left">
-                    <p className="truncate text-sm font-medium text-ink">{e.description}</p>
-                    <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted">
-                      {e.due_on < today ? <Badge tone="danger" className="h-5 px-2 text-[11px]">Vencido</Badge> : null}
-                      Vence {fmt(e.due_on, "d MMM")}
-                    </p>
-                  </button>
-                  <span className="text-sm font-semibold tabular-nums text-ink">{money(e.amount, e.currency)}</span>
-                  <Button size="sm" variant="soft" onClick={() => markPaid(e)}>
-                    <Check className="size-3.5" /> Pagar
-                  </Button>
-                </div>
-              ))}
+              {pending.map((e) => {
+                const partial = (e.paid_amount ?? 0) > 0;
+                return (
+                  <div key={e.id} className="bg-surface px-3.5 py-3">
+                    <div className="flex items-center gap-3">
+                      <button type="button" onClick={() => push({ type: "expense-form", expenseId: e.id })} className="min-w-0 flex-1 text-left">
+                        <p className="truncate text-sm font-medium text-ink">{e.description}</p>
+                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted">
+                          {e.due_on < today ? <Badge tone="danger" className="h-5 px-2 text-[11px]">Vencido</Badge> : null}
+                          Vence {fmt(e.due_on, "d MMM")}
+                        </p>
+                      </button>
+                      <span className="text-right">
+                        <span className="block text-sm font-semibold tabular-nums text-ink">{money(expenseBalance(e), e.currency)}</span>
+                        {partial ? <span className="block text-[11px] text-muted">de {money(e.amount, e.currency)}</span> : null}
+                      </span>
+                      <Button size="sm" variant="soft" onClick={() => push({ type: "expense-payment", expenseId: e.id })}>
+                        <Check className="size-3.5" /> Pagar
+                      </Button>
+                    </div>
+                    {partial ? <Progress value={(e.paid_amount / e.amount) * 100} tone="accent" className="mt-2.5" /> : null}
+                  </div>
+                );
+              })}
             </div>
           )}
         </SheetSection>
 
-        {paid.length ? (
-          <SheetSection title={`Historial de pagos · ${paid.length}`}>
+        {payments.length ? (
+          <SheetSection title={`Historial de pagos · ${payments.length}`}>
             <div className="divide-y divide-line/70 overflow-hidden rounded-2xl border border-line">
-              {paid.slice(0, 20).map((e) => (
-                <button key={e.id} type="button" onClick={() => push({ type: "expense-form", expenseId: e.id })} className="flex w-full items-center gap-3 bg-surface px-3.5 py-3 text-left hover:bg-subtle">
+              {payments.slice(0, 30).map((p) => (
+                <button key={p.id} type="button" onClick={() => push({ type: "expense-form", expenseId: p.expense.id })} className="flex w-full items-center gap-3 bg-surface px-3.5 py-3 text-left hover:bg-subtle">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-ink">{e.description}</p>
-                    <p className="text-xs text-muted">Pagado el {capitalize(fmt(e.paid_on!, "d MMM yyyy"))}</p>
+                    <p className="truncate text-sm font-medium text-ink">{p.expense.description}</p>
+                    <p className="truncate text-xs text-muted">
+                      {capitalize(fmt(p.paid_on, "d MMM yyyy"))} · {METHOD_META[p.method].label}
+                      {p.notes ? ` · ${p.notes}` : ""}
+                    </p>
                   </div>
-                  <span className="text-sm font-semibold tabular-nums text-ink-2">{money(e.amount, e.currency)}</span>
+                  <span className="text-sm font-semibold tabular-nums text-ink-2">{money(p.amount, p.expense.currency, { decimals: true })}</span>
                 </button>
               ))}
             </div>
@@ -295,7 +297,15 @@ export function SupplierSheet({ id }: { id: string }) {
         <Button variant="secondary" size="icon" aria-label="Editar proveedor" onClick={() => push({ type: "supplier-form", supplierId: supplier.id })}>
           <Pencil className="size-4" />
         </Button>
-        <Button className="ml-auto" size="lg" onClick={() => push({ type: "expense-form", defaults: { supplierId: supplier.id, paid: true, description: supplier.name } })}>
+        <Button
+          className="ml-auto"
+          size="lg"
+          onClick={() =>
+            pending.length
+              ? push({ type: "supplier-payment", supplierId: supplier.id })
+              : push({ type: "expense-form", defaults: { supplierId: supplier.id, paid: true, description: supplier.name } })
+          }
+        >
           <Plus className="size-4" />
           Registrar pago
         </Button>

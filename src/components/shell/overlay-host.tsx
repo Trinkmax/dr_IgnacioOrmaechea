@@ -11,6 +11,7 @@ import { AppointmentSheet } from "@/components/forms/appointment-sheet";
 import { PatientFormSheet, PatientSheet } from "@/components/forms/patient-forms";
 import { PaymentFormSheet } from "@/components/forms/payment-form";
 import { ExpenseFormSheet, RecurringFormSheet } from "@/components/forms/expense-forms";
+import { ExpensePaymentSheet, SupplierPaymentSheet } from "@/components/forms/expense-payment-forms";
 import { SupplierFormSheet, SupplierSheet } from "@/components/forms/supplier-forms";
 import { TreatmentFormSheet } from "@/components/forms/treatment-form";
 import { WaitlistFormSheet, WaitlistSheet } from "@/components/forms/waitlist-forms";
@@ -30,6 +31,10 @@ function renderSpec(spec: OverlaySpec) {
       return <PaymentFormSheet paymentId={spec.paymentId} patientId={spec.patientId} appointmentId={spec.appointmentId} />;
     case "expense-form":
       return <ExpenseFormSheet expenseId={spec.expenseId} defaults={spec.defaults} />;
+    case "expense-payment":
+      return <ExpensePaymentSheet expenseId={spec.expenseId} />;
+    case "supplier-payment":
+      return <SupplierPaymentSheet supplierId={spec.supplierId} />;
     case "recurring-form":
       return <RecurringFormSheet recurringId={spec.recurringId} />;
     case "supplier":

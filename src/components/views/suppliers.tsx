@@ -3,17 +3,16 @@
 import { useMemo, useState } from "react";
 import { addDays } from "date-fns";
 import { AlarmClock, Check, CircleDollarSign, Plus, Search, Sparkles, Truck } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { controlClass } from "@/components/ui/field";
 import { Badge, Card, EmptyState, Kpi, PageHeader, SectionTitle, Skeleton } from "@/components/ui/misc";
 import { AdminOnly } from "@/components/views/admin-only";
 import { useOverlay } from "@/components/shell/overlay-store";
 import { useSuppliers } from "@/lib/queries/catalog";
-import { usePayables, useUpdateExpense } from "@/lib/queries/money";
+import { usePayables } from "@/lib/queries/money";
+import { expenseBalance } from "@/components/forms/expense-payment-forms";
 import { fmt, isoDate, money } from "@/lib/format";
-import { cn, errorMessage, normalize } from "@/lib/utils";
-import type { ExpenseWithRefs } from "@/lib/types";
+import { cn, normalize } from "@/lib/utils";
 
 export function SuppliersView() {
   return (
@@ -27,7 +26,6 @@ function Suppliers() {
   const { open } = useOverlay();
   const { data: suppliers = [], isLoading } = useSuppliers();
   const { data: payables = [], isLoading: loadingPayables } = usePayables();
-  const updateExpense = useUpdateExpense();
   const [query, setQuery] = useState("");
   const today = isoDate(new Date());
   const inAWeek = isoDate(addDays(new Date(), 7));
@@ -38,7 +36,7 @@ function Suppliers() {
     let overdue = 0;
     let soon = 0;
     for (const e of payables) {
-      const ars = e.amount_ars ?? 0;
+      const ars = e.balance_ars ?? e.amount_ars ?? 0;
       total += ars;
       if (e.due_on < today) overdue += ars;
       else if (e.due_on <= inAWeek) soon += ars;
@@ -59,18 +57,6 @@ function Suppliers() {
       .filter((s) => !q || normalize(s.name).includes(q) || normalize(s.category).includes(q))
       .sort((a, b) => Number(b.active) - Number(a.active) || (summary.bySupplier.get(b.id)?.total ?? 0) - (summary.bySupplier.get(a.id)?.total ?? 0) || a.name.localeCompare(b.name, "es"));
   }, [suppliers, query, summary.bySupplier]);
-
-  const pay = async (e: ExpenseWithRefs) => {
-    try {
-      await updateExpense.mutateAsync({ id: e.id, patch: { paid_on: isoDate(new Date()), method: "transferencia" } });
-      toast.success(`Pagado · ${money(e.amount, e.currency)}`, {
-        description: e.supplier?.name ?? e.description,
-        action: { label: "Deshacer", onClick: () => updateExpense.mutate({ id: e.id, patch: { paid_on: null, method: null } }) },
-      });
-    } catch (err) {
-      toast.error(errorMessage(err));
-    }
-  };
 
   return (
     <div className="mx-auto w-full max-w-[1200px] px-4 py-6 md:px-8 md:py-8">
@@ -96,7 +82,7 @@ function Suppliers() {
             <SectionTitle title="Cuentas por pagar" subtitle="Ordenadas por vencimiento" />
             <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
               <Sparkles className="size-3.5 text-accent" />
-              Al marcar una cirugía como atendida se generan solos los pagos a quirófano, anestesista, ayudantes e implantes.
+              Al marcar una cirugía como atendida se generan solos los pagos a quirófano, anestesista, ayudantes e implantes. Podés pagar cada deuda completa o en partes.
             </p>
           </div>
           {loadingPayables ? (
@@ -111,18 +97,23 @@ function Suppliers() {
             <ul className="divide-y divide-line/70">
               {payables.map((e) => {
                 const overdue = e.due_on < today;
+                const partial = (e.paid_amount ?? 0) > 0;
                 return (
                   <li key={e.id} className="flex items-center gap-3 px-4 py-3 md:px-5">
                     <button type="button" onClick={() => open({ type: "expense-form", expenseId: e.id })} className="min-w-0 flex-1 text-left">
                       <p className="truncate text-sm font-medium text-ink">{e.description}</p>
                       <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted">
                         {e.auto_generated ? <Badge tone="accent" className="h-5 px-2 text-[10px]">Cirugía</Badge> : null}
+                        {partial ? <Badge tone="info" className="h-5 px-2 text-[10px]">Pago parcial</Badge> : null}
                         {e.supplier?.name ?? "Sin proveedor"} ·{" "}
                         <span className={cn(overdue && "font-medium text-danger")}>{overdue ? "venció" : "vence"} {fmt(e.due_on, "d MMM")}</span>
                       </p>
                     </button>
-                    <span className="text-sm font-semibold tabular-nums text-ink">{money(e.amount, e.currency)}</span>
-                    <Button size="sm" variant="soft" onClick={() => pay(e)}>
+                    <span className="text-right">
+                      <span className="block text-sm font-semibold tabular-nums text-ink">{money(expenseBalance(e), e.currency)}</span>
+                      {partial ? <span className="block text-[11px] text-muted">de {money(e.amount, e.currency)}</span> : null}
+                    </span>
+                    <Button size="sm" variant="soft" onClick={() => open({ type: "expense-payment", expenseId: e.id })}>
                       <Check className="size-3.5" /> Pagar
                     </Button>
                   </li>
