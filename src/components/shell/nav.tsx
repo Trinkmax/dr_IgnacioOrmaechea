@@ -11,6 +11,7 @@ import { useOverlay } from "@/components/shell/overlay-store";
 import { NAV_GROUPS, isActive, navFor } from "@/components/shell/nav-config";
 import { useRole, useSignOut } from "@/lib/queries/session";
 import { useSettings } from "@/lib/queries/catalog";
+import { usePendingBookings } from "@/lib/queries/booking";
 import { cn } from "@/lib/utils";
 
 /** El logo se usa como máscara: toma el color del texto (currentColor) sobre cualquier fondo. */
@@ -49,6 +50,12 @@ export function BrandLogo({ className }: { className?: string }) {
   return <span role="img" aria-label="Dr. José I. Ormaechea" className={cn("block", className)} style={logoMask("/brand/logo-full.png")} />;
 }
 
+/** Contadores de la navegación (solicitudes de turno pendientes). */
+function useNavBadges() {
+  const { data: pending = [] } = usePendingBookings();
+  return { bookings: pending.length } as const;
+}
+
 function useQuickActions() {
   const { open } = useOverlay();
   const { isAdmin } = useRole();
@@ -72,6 +79,7 @@ export function Sidebar({ onSearch }: { onSearch: () => void }) {
   const signOut = useSignOut();
   const items = navFor(role);
   const actions = useQuickActions();
+  const badges = useNavBadges();
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-[76px] shrink-0 flex-col bg-[#1c1714] text-[#d9cfc5] md:flex lg:w-[252px]">
@@ -144,7 +152,7 @@ export function Sidebar({ onSearch }: { onSearch: () => void }) {
               <ul className="space-y-0.5">
                 {groupItems.map((item) => (
                   <li key={item.href}>
-                    <SidebarLink href={item.href} label={item.label} active={isActive(pathname, item.href)}>
+                    <SidebarLink href={item.href} label={item.label} active={isActive(pathname, item.href)} count={item.badge ? badges[item.badge] : 0}>
                       <item.icon className="size-[18px]" />
                     </SidebarLink>
                   </li>
@@ -180,19 +188,25 @@ export function Sidebar({ onSearch }: { onSearch: () => void }) {
   );
 }
 
-function SidebarLink({ href, label, active, children }: { href: string; label: string; active: boolean; children: ReactNode }) {
+function SidebarLink({ href, label, active, count = 0, children }: { href: string; label: string; active: boolean; count?: number; children: ReactNode }) {
   return (
     <Link
       href={href}
-      title={label}
+      title={count ? `${label} (${count})` : label}
       className={cn(
         "group relative flex h-10 items-center justify-center gap-3 rounded-xl px-3 text-[14px] font-medium transition-colors lg:justify-start",
         active ? "bg-white/[0.09] text-white" : "text-[#b9ab9e] hover:bg-white/[0.05] hover:text-white",
       )}
     >
       {active ? <span className="absolute -left-3 top-2 bottom-2 w-[3px] rounded-r-full bg-accent lg:-left-4" aria-hidden /> : null}
-      {children}
+      <span className="relative flex">
+        {children}
+        {count ? <span className="absolute -right-1 -top-1 size-2 rounded-full bg-accent ring-2 ring-[#1c1714] lg:hidden" aria-hidden /> : null}
+      </span>
       <span className="hidden lg:inline">{label}</span>
+      {count ? (
+        <span className="ml-auto hidden h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-[11px] font-semibold tabular-nums text-white lg:inline-flex">{count}</span>
+      ) : null}
     </Link>
   );
 }
@@ -229,6 +243,7 @@ export function BottomNav() {
   const actions = useQuickActions();
   const [quickOpen, setQuickOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const badges = useNavBadges();
   const items = navFor(role);
   const primary = ["/", "/agenda", "/pacientes"];
   const more = items.filter((i) => !primary.includes(i.href));
@@ -269,8 +284,13 @@ export function BottomNav() {
           <button
             type="button"
             onClick={() => setMoreOpen(true)}
-            className={cn("flex flex-1 flex-col items-center justify-center gap-1 text-[10.5px] font-medium", moreActive ? "text-ink" : "text-muted")}
+            className={cn("relative flex flex-1 flex-col items-center justify-center gap-1 text-[10.5px] font-medium", moreActive ? "text-ink" : "text-muted")}
           >
+            {badges.bookings ? (
+              <span className="absolute left-1/2 top-2.5 ml-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold tabular-nums text-white" aria-label={`${badges.bookings} solicitudes pendientes`}>
+                {badges.bookings}
+              </span>
+            ) : null}
             <span className="grid size-[22px] grid-cols-2 gap-[3px] p-[3px]" aria-hidden>
               {[0, 1, 2, 3].map((i) => (
                 <span key={i} className={cn("rounded-[3px] border-[1.6px] border-current", moreActive && i === 0 && "bg-current")} />
@@ -315,7 +335,10 @@ export function BottomNav() {
               className={cn("flex items-center gap-3 border-b border-line/70 px-4 py-3.5 text-[15px] font-medium last:border-b-0", isActive(pathname, item.href) ? "bg-subtle text-ink" : "text-ink-2")}
             >
               <item.icon className="size-5 text-muted" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.badge && badges[item.badge] ? (
+                <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-accent px-2 text-xs font-semibold tabular-nums text-white">{badges[item.badge]}</span>
+              ) : null}
             </Link>
           ))}
         </div>

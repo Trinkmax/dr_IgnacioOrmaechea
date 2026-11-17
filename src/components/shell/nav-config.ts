@@ -2,9 +2,11 @@ import {
   Calculator,
   CalendarDays,
   Home,
+  Inbox,
   Receipt,
   Settings,
   Sparkles,
+  Target,
   Truck,
   UsersRound,
   Wallet,
@@ -17,13 +19,17 @@ export type NavItem = {
   label: string;
   icon: LucideIcon;
   adminOnly?: boolean;
+  /** Contador que se muestra junto al ítem. */
+  badge?: "bookings";
   group: "consultorio" | "finanzas" | "catalogo" | "sistema";
 };
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Inicio", icon: Home, group: "consultorio" },
   { href: "/agenda", label: "Agenda", icon: CalendarDays, group: "consultorio" },
+  { href: "/solicitudes", label: "Solicitudes", icon: Inbox, group: "consultorio", badge: "bookings" },
   { href: "/pacientes", label: "Pacientes", icon: UsersRound, group: "consultorio" },
+  { href: "/objetivos", label: "Objetivos", icon: Target, group: "consultorio", adminOnly: true },
   { href: "/cobros", label: "Cobros", icon: Wallet, group: "finanzas" },
   { href: "/gastos", label: "Gastos", icon: Receipt, group: "finanzas", adminOnly: true },
   { href: "/proveedores", label: "Proveedores", icon: Truck, group: "finanzas", adminOnly: true },

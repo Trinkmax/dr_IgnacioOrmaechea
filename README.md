@@ -12,7 +12,7 @@ Sistema de gestión del consultorio de Cirugía Plástica: agenda con arrastrar 
 
 ```bash
 npm install
-cp .env.example .env.local   # ya viene configurado para el proyecto de Supabase
+cp .env.example .env.local   # URL y clave publicable del proyecto de Supabase
 npm run dev                  # http://localhost:3000  (si el navegador no abre "localhost", usar http://127.0.0.1:3000)
 ```
 
@@ -50,6 +50,9 @@ Los permisos se aplican en la base de datos con RLS (no solo ocultando pantallas
 - **Cirugía atendida ⇒ cuentas por pagar automáticas** a quirófano, anestesista, ayudantes e implantes (según la estructura de costos del tratamiento, vencen a los 7 días). Se puede desactivar en Ajustes.
 - **Calculadora**: costos directos + gastos fijos prorrateados por hora + impuestos ⇒ ganancia neta, margen, precio sugerido por margen objetivo y ranking de rentabilidad por hora.
 - **Tiempo real**: lo que carga la secretaria aparece solo en el teléfono del Dr.
+- **Reservas online** (`/reservar`, público, sin cuenta): la paciente elige tratamiento, día y horario libre y deja sus datos. El horario queda tomado hasta que el consultorio decide. En **Solicitudes** el equipo recibe el aviso al instante (y notificación del sistema si se activan los avisos), confirma o descarta, y al confirmar se crea la ficha (o se reutiliza si ya era paciente, por DNI o celular) y el turno "confirmado" en la agenda. Desde ahí se manda el WhatsApp de confirmación. La paciente ve el estado de su pedido en la misma página.
+  - **Solicitudes → Horarios y ajustes** (admin): franjas semanales, qué tratamientos se pueden pedir, anticipación mínima, hasta cuántos días, intervalo, textos y WhatsApp del consultorio. Los bloqueos y turnos de la agenda nunca se ofrecen.
+- **Objetivos** (admin): metas mensuales de facturación, turnos atendidos, cirugías y pacientes nuevos con ritmo del mes; turnos que quedan por dar (hoy, semana, mes), carga de las próximas 8 semanas vs. capacidad, ausentismo, mapa de calor de demanda por día y hora, pacientes nuevos por origen y métricas de reservas online.
 
 ## Marca
 

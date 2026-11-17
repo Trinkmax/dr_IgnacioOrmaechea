@@ -11,6 +11,7 @@ import {
   CircleDollarSign,
   ClipboardList,
   HandCoins,
+  Inbox,
   MessageCircle,
   Receipt,
   Scale,
@@ -29,6 +30,7 @@ import { useAppointmentsRange, useUpdateAppointment, useWaitlist } from "@/lib/q
 import { useRecurringExpenses, useSettings } from "@/lib/queries/catalog";
 import { useBalances, useExpensesRange, usePayables, useStats } from "@/lib/queries/money";
 import { useRole } from "@/lib/queries/session";
+import { usePendingBookings } from "@/lib/queries/booking";
 import { useNow } from "@/lib/hooks";
 import { appointmentPaid } from "@/lib/money-helpers";
 import { capitalize, fmt, isoDate, money, percent, relativeDay, time, toArs } from "@/lib/format";
@@ -61,6 +63,7 @@ export function DashboardView() {
   const { data: balances = [] } = useBalances();
   const { data: payables = [] } = usePayables(isAdmin);
   const { data: waitlist = [] } = useWaitlist();
+  const { data: bookingRequests = [] } = usePendingBookings();
   const { data: recurring = [] } = useRecurringExpenses(isAdmin);
   const { data: monthExpenses = [] } = useExpensesRange(isoDate(monthStart), isoDate(endOfDay(addDays(addMonths(monthStart, 1), -1))), isAdmin);
 
@@ -169,6 +172,8 @@ export function DashboardView() {
           </>
         }
       />
+
+      {bookingRequests.length ? <PendingBookingsBanner requests={bookingRequests} /> : null}
 
       {/* KPIs */}
       {isAdmin ? (
@@ -525,5 +530,33 @@ function ConfirmRow({ appt }: { appt: CalendarAppointment }) {
         Confirmó
       </Button>
     </div>
+  );
+}
+
+function PendingBookingsBanner({ requests }: { requests: { id: string; full_name: string; starts_at: string }[] }) {
+  const n = requests.length;
+  return (
+    <Link
+      href="/solicitudes"
+      className="mt-6 flex animate-rise items-center gap-3 rounded-card border border-accent/30 bg-accent-soft/70 px-4 py-3.5 transition-colors hover:bg-accent-soft md:mt-8 md:px-5"
+    >
+      <span className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-white">
+        <span className="absolute inset-0 animate-ping-soft rounded-xl bg-accent/40" aria-hidden />
+        <Inbox className="relative size-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-semibold text-ink">
+          {n === 1 ? "1 solicitud de turno" : `${n} solicitudes de turno`} para confirmar
+        </span>
+        <span className="block truncate text-[13px] text-ink-2">
+          {requests
+            .slice(0, 3)
+            .map((r) => `${firstName(r.full_name)} · ${relativeDay(r.starts_at)} ${time(r.starts_at)}`)
+            .join("  ·  ")}
+          {n > 3 ? `  y ${n - 3} más` : ""}
+        </span>
+      </span>
+      <ArrowRight className="size-4 shrink-0 text-accent-ink" />
+    </Link>
   );
 }

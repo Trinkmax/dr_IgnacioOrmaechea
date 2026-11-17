@@ -71,6 +71,7 @@ function waitlistAsAppointment(item: WaitlistWithRefs): CalendarAppointment {
     price: item.treatment?.price ?? 0,
     currency: item.treatment?.currency ?? "ARS",
     notes: null,
+    source: "manual",
     created_by: null,
     created_at: item.created_at,
     updated_at: item.created_at,

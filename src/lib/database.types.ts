@@ -25,6 +25,7 @@ export type Database = {
           notes: string | null
           patient_id: string | null
           price: number
+          source: string
           starts_at: string
           status: Database["public"]["Enums"]["appointment_status"]
           title: string | null
@@ -40,6 +41,7 @@ export type Database = {
           notes?: string | null
           patient_id?: string | null
           price?: number
+          source?: string
           starts_at: string
           status?: Database["public"]["Enums"]["appointment_status"]
           title?: string | null
@@ -55,6 +57,7 @@ export type Database = {
           notes?: string | null
           patient_id?: string | null
           price?: number
+          source?: string
           starts_at?: string
           status?: Database["public"]["Enums"]["appointment_status"]
           title?: string | null
@@ -71,6 +74,122 @@ export type Database = {
           },
           {
             foreignKeyName: "appointments_treatment_id_fkey"
+            columns: ["treatment_id"]
+            isOneToOne: false
+            referencedRelation: "treatments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_hours: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          start_time: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          start_time: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          start_time?: string
+          weekday?: number
+        }
+        Relationships: []
+      }
+      booking_requests: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          dni: string | null
+          email: string | null
+          ends_at: string
+          full_name: string
+          id: string
+          notes: string | null
+          patient_id: string | null
+          phone: string
+          reply: string | null
+          source: string | null
+          starts_at: string
+          status: Database["public"]["Enums"]["booking_status"]
+          token: string
+          treatment_id: string | null
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          dni?: string | null
+          email?: string | null
+          ends_at: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          phone: string
+          reply?: string | null
+          source?: string | null
+          starts_at: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          token?: string
+          treatment_id?: string | null
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          dni?: string | null
+          email?: string | null
+          ends_at?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          phone?: string
+          reply?: string | null
+          source?: string | null
+          starts_at?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          token?: string
+          treatment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_requests_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_requests_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_requests_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_requests_treatment_id_fkey"
             columns: ["treatment_id"]
             isOneToOne: false
             referencedRelation: "treatments"
@@ -412,10 +531,22 @@ export type Database = {
       settings: {
         Row: {
           auto_payables: boolean
+          booking_confirm_template: string
+          booking_enabled: boolean
+          booking_horizon_days: number
+          booking_intro: string
+          booking_min_notice_hours: number
+          booking_step_min: number
+          clinic_address: string | null
           clinic_name: string
+          clinic_phone: string | null
           clinic_tagline: string
           day_end: number
           day_start: number
+          goal_appointments: number | null
+          goal_income_ars: number | null
+          goal_new_patients: number | null
+          goal_surgeries: number | null
           id: number
           monthly_hours: number
           reminder_template: string
@@ -427,10 +558,22 @@ export type Database = {
         }
         Insert: {
           auto_payables?: boolean
+          booking_confirm_template?: string
+          booking_enabled?: boolean
+          booking_horizon_days?: number
+          booking_intro?: string
+          booking_min_notice_hours?: number
+          booking_step_min?: number
+          clinic_address?: string | null
           clinic_name?: string
+          clinic_phone?: string | null
           clinic_tagline?: string
           day_end?: number
           day_start?: number
+          goal_appointments?: number | null
+          goal_income_ars?: number | null
+          goal_new_patients?: number | null
+          goal_surgeries?: number | null
           id?: number
           monthly_hours?: number
           reminder_template?: string
@@ -442,10 +585,22 @@ export type Database = {
         }
         Update: {
           auto_payables?: boolean
+          booking_confirm_template?: string
+          booking_enabled?: boolean
+          booking_horizon_days?: number
+          booking_intro?: string
+          booking_min_notice_hours?: number
+          booking_step_min?: number
+          clinic_address?: string | null
           clinic_name?: string
+          clinic_phone?: string | null
           clinic_tagline?: string
           day_end?: number
           day_start?: number
+          goal_appointments?: number | null
+          goal_income_ars?: number | null
+          goal_new_patients?: number | null
+          goal_surgeries?: number | null
           id?: number
           monthly_hours?: number
           reminder_template?: string
@@ -555,6 +710,7 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["treatment_kind"]
           name: string
+          online_booking: boolean
           price: number
           sort_order: number
           updated_at: string
@@ -569,6 +725,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["treatment_kind"]
           name: string
+          online_booking?: boolean
           price?: number
           sort_order?: number
           updated_at?: string
@@ -583,6 +740,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["treatment_kind"]
           name?: string
+          online_booking?: boolean
           price?: number
           sort_order?: number
           updated_at?: string
@@ -664,6 +822,24 @@ export type Database = {
       }
     }
     Functions: {
+      booking_info: { Args: never; Returns: Json }
+      booking_slots: {
+        Args: { p_from: string; p_to: string; p_treatment_id: string }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
+      booking_status: { Args: { p_token: string }; Returns: Json }
+      cancel_booking: { Args: { p_token: string }; Returns: Json }
+      confirm_booking: {
+        Args: { p_force?: boolean; p_request_id: string }
+        Returns: string
+      }
+      decline_booking: {
+        Args: { p_reply?: string; p_request_id: string }
+        Returns: undefined
+      }
       pay_supplier: {
         Args: {
           p_amount: number
@@ -675,6 +851,20 @@ export type Database = {
         }
         Returns: string[]
       }
+      request_booking: {
+        Args: {
+          p_dni?: string
+          p_email?: string
+          p_full_name: string
+          p_notes?: string
+          p_phone: string
+          p_source?: string
+          p_starts_at: string
+          p_treatment_id: string
+          p_website?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "asistente"
@@ -685,6 +875,7 @@ export type Database = {
         | "atendido"
         | "ausente"
         | "cancelado"
+      booking_status: "pendiente" | "confirmado" | "rechazado" | "cancelado"
       currency_code: "ARS" | "USD"
       expense_kind: "fijo" | "variable"
       payment_method:
@@ -831,6 +1022,7 @@ export const Constants = {
         "ausente",
         "cancelado",
       ],
+      booking_status: ["pendiente", "confirmado", "rechazado", "cancelado"],
       currency_code: ["ARS", "USD"],
       expense_kind: ["fijo", "variable"],
       payment_method: [

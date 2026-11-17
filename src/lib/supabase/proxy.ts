@@ -2,9 +2,17 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_PATHS = ["/login"];
+// Abiertas a todo el mundo, con o sin sesión: el portal de reservas de las pacientes.
+const OPEN_PATHS = ["/reservar"];
+
+const matches = (pathname: string, paths: string[]) =>
+  paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
 // Refresca la sesión en cada request y protege las rutas privadas.
 export async function updateSession(request: NextRequest) {
+  // El portal público no usa la sesión del equipo: no hace falta tocar cookies.
+  if (matches(request.nextUrl.pathname, OPEN_PATHS)) return NextResponse.next({ request });
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -32,7 +40,7 @@ export async function updateSession(request: NextRequest) {
   const isAuthenticated = Boolean(data?.claims?.sub);
 
   const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+  const isPublic = matches(pathname, PUBLIC_PATHS);
 
   if (!isAuthenticated && !isPublic) {
     return redirectWithSession(request, supabaseResponse, "/login");

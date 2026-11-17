@@ -8,6 +8,7 @@ export type TreatmentKind = Enums["treatment_kind"];
 export type AppointmentStatus = Enums["appointment_status"];
 export type PaymentMethod = Enums["payment_method"];
 export type ExpenseKind = Enums["expense_kind"];
+export type BookingStatus = Enums["booking_status"];
 
 export type Member = Tables<"members">;
 export type Settings = Tables<"settings">;
@@ -22,6 +23,23 @@ export type RecurringExpense = Tables<"recurring_expenses">;
 export type Supplier = Tables<"suppliers">;
 export type WaitlistItem = Tables<"waitlist">;
 export type AppointmentBalance = Tables<"appointment_balances">;
+export type BookingRequest = Tables<"booking_requests">;
+export type BookingHour = Tables<"booking_hours">;
+
+/** Solicitud de turno online con el tratamiento y la ficha detectada. */
+export type BookingRequestWithRefs = BookingRequest & {
+  treatment: Pick<Treatment, "id" | "name" | "color" | "kind" | "duration_min"> | null;
+  patient: Pick<Patient, "id" | "full_name"> | null;
+};
+
+export const BOOKING_STATUS_META: Record<BookingStatus, { label: string; tone: "neutral" | "info" | "accent" | "success" | "warning" | "danger" }> = {
+  pendiente: { label: "Pendiente", tone: "warning" },
+  confirmado: { label: "Confirmado", tone: "success" },
+  rechazado: { label: "Descartado", tone: "danger" },
+  cancelado: { label: "Cancelado por la paciente", tone: "neutral" },
+};
+
+export const WEEKDAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"] as const;
 
 export type TreatmentWithCosts = Treatment & { costs: TreatmentCost[] };
 
